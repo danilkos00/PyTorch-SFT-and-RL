@@ -18,7 +18,7 @@ import json
 
 tokenizer = None
 
-def grpo_train(dataset, config_path: str, model: str, checkpoint: str | None = None):
+def grpo_train(dataset, config_path: str, model_weights_path: str, checkpoint: str | None = None):
     with open(config_path) as f:
         config = json.load(f)
 
@@ -39,6 +39,8 @@ def grpo_train(dataset, config_path: str, model: str, checkpoint: str | None = N
     use_std_normalization = bool(config['training']['use_std_normalization'])
     loss_type = config['training']['loss_type']
     epochs_per_rollout_batch = config['training']['epochs_per_rollout_batch']
+    grad_clip = config['training']['grad_clip']
+    checkpoint_path = config['training']['checkpoint_path']
     os.environ["TOKENIZERS_PARALLELISM"] = 'false'
 
     global tokenizer
@@ -48,7 +50,7 @@ def grpo_train(dataset, config_path: str, model: str, checkpoint: str | None = N
     n_prompts_per_rollout_batch = rollout_batch_size // group_size
 
     policy = AutoModelForCausalLM.from_pretrained(
-        model,
+        model_weights_path,
         torch_dtype=torch.bfloat16,
         device_map='auto',
     )
@@ -64,8 +66,8 @@ def grpo_train(dataset, config_path: str, model: str, checkpoint: str | None = N
     policy, optimizer = accelerator.prepare(policy, optimizer)
 
     llm = LLM(
-        model=model,
-        tokenizer='Qwen/Qwen2.5-Math-1.5B',
+        model=model_weights_path,
+        tokenizer=tokenizer_name,
         tensor_parallel_size=1,
         dtype='float16',
         gpu_memory_utilization=gpu_memory_utilization,
@@ -125,7 +127,7 @@ def grpo_train(dataset, config_path: str, model: str, checkpoint: str | None = N
 
         for train_step in range(epochs_per_rollout_batch):
             running_loss = 0.0
-            for i, (micro_batch, batched_advantages) in enumerate(dataloader):
+            for micro_batch, batched_advantages in dataloader:
                 input_ids = micro_batch['input_ids']
                 batched_responses = micro_batch['labels']
                 response_mask = micro_batch['response_mask']
@@ -146,9 +148,9 @@ def grpo_train(dataset, config_path: str, model: str, checkpoint: str | None = N
 
             if running_loss < min_loss:
                 min_loss = running_loss
-                save_checkpoint(policy, optimizer, grpo_step, 'checkpoint.tar')
+                save_checkpoint(policy, optimizer, grpo_step, checkpoint_path)
                 
-            accelerator.clip_grad_norm_(policy.parameters(), max_norm=1.0)
+            accelerator.clip_grad_norm_(policy.parameters(), max_norm=grad_clip)
             optimizer.step()
             optimizer.zero_grad()
 
@@ -157,7 +159,7 @@ def grpo_train(dataset, config_path: str, model: str, checkpoint: str | None = N
     save_checkpoint(policy, optimizer, grpo_step, 'final_checkpoint.tar')
 
 
-def sft_train(dataset, config_path: str, model: str):
+def sft_train(dataset, config_path: str, model_weights_path: str):
     with open(config_path) as f:
         config = json.load(f)
 
@@ -182,14 +184,14 @@ def sft_train(dataset, config_path: str, model: str):
         num_workers=4
     )
 
-    policy = AutoModelForCausalLM.from_pretrained(
-        model,
+    model = AutoModelForCausalLM.from_pretrained(
+        model_weights_path,
         torch_dtype=torch.bfloat16,
         device_map="auto"
     )
 
     optimizer = torch.optim.AdamW(
-        policy.parameters(),
+        model.parameters(),
         lr=learning_rate,
         weight_decay=weight_decay,
         betas=betas
