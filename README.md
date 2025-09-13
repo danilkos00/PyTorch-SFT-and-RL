@@ -52,7 +52,7 @@ pip install -r requirements.txt
 
 ## Demo Notebook
 ### A Google Colab notebook is available to quickly test the fine-tuned model:
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/danilkos00/PyTorch-Transformer/blob/main/Transformer_demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/danilkos00/PyTorch-SFT-and-RL/blob/main/pytorch-posttraining-demo.ipynb)
 
 ---
 
