@@ -6,7 +6,7 @@
   },
   "training": {
     "sft_steps": 100,
-    "model_name": "Qwen/Qwen2.5-Math-1.5B",
+    "tokenizer_name": "Qwen/Qwen2.5-Math-1.5B",
     "batch_size": 256,
     "gradient_accumulation_steps": 128
   }
