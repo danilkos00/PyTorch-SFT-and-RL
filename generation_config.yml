@@ -1,0 +1,5 @@
+generate:
+  temperature: 0.5
+  max_new_tokens: 256
+  do_sample: True
+  stop_sequences: [</answer>]
