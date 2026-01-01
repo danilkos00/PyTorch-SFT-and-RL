@@ -1,6 +1,28 @@
 # PyTorch-SFT-and-RL
 
-Utilities and training pipeline for fine-tuning **Qwen2.5-Math-1.5B** on the GSM8K dataset to improve reasoning abilities in solving school-level math problems.
+Utilities and training pipeline for fine-tuning **Qwen2.5-Math-1.5B** on the GSM8K dataset to improve reasoning abilities in solving school-level math problems and FastAPI inference with fine-tuned model.
+
+---
+
+## FastAPI inference
+
+Run local API:
+```bash
+pip install -r requirements.txt
+uvicorn app:app --reload
+```
+
+## Building and Running Docker Image
+
+### Build the Docker image
+```bash
+docker build -t <image_name> .
+```
+
+### Run the container
+```bash
+docker run -d -p 80:80 <image_name>
+```
 
 ---
 
@@ -9,6 +31,7 @@ This project implements:
 - **SFT (Supervised Fine-Tuning)** on GSM8K.
 - **GRPO (Group Relative Policy Optimization)** RL algorithm.
 - Custom utilities for both SFT and GRPO training.
+- FastAPI app for model inference
 
 After fine-tuning, the model shows significantly improved reasoning abilities on math tasks.
 
@@ -39,20 +62,9 @@ This is an **educational project** to explore post-training methods for large la
 
 ---
 
-## How to Use
-
-### Install dependencies
-```bash
-git clone https://github.com/danilkos00/PyTorch-SFT-and-RL.git -qq
-cd PyTorch-SFT-and-RL
-pip install -r requirements.txt
-```
-
----
-
 ## Demo Notebook
 ### A Google Colab notebook is available to quickly test the fine-tuned model:
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/danilkos00/PyTorch-Transformer/blob/main/Transformer_demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/danilkos00/PyTorch-SFT-and-RL/blob/main/pytorch-posttraining-demo.ipynb)
 
 ---
 
