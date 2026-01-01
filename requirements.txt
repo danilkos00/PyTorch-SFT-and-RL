@@ -5,3 +5,5 @@ kagglehub==0.3.13
 transformers==4.56.1
 datasets==4.0.0
 tqdm==4.67.1
+gdown==5.2.0
+yaml==6.0.2
